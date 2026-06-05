@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campvybe — Tu ecosistema de aventura</title>
+  <meta name="description" content="Descubre campings épicos, conecta con la comunidad y equípate con el mejor gear. El ecosistema digital para campistas." />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest:  '#2D4A22',
+            moss:    '#4A7A32',
+            fern:    '#6B9E4A',
+            sage:    '#A8C882',
+            sunset:  '#D4622A',
+            ember:   '#E8863A',
+            gold:    '#F2B34A',
+            cream:   '#F5EDD8',
+            stone:   '#8A8278',
+            pebble:  '#C4BEAC',
+            dusk:    '#1A1F14',
+            bark:    '#3D3228',
+            smoke:   '#F0EBE0',
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'serif'],
+            body:    ['"DM Sans"', 'sans-serif'],
+          },
+          keyframes: {
+            float:     { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+            pulselive:  { '0%,100%': { opacity: '1', transform: 'scale(1)' }, '50%': { opacity: '0.5', transform: 'scale(1.4)' } },
+            fadeup:    { from: { opacity: '0', transform: 'translateY(28px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+            grain:     {
+              '0%,100%': { transform: 'translate(0,0)' },
+              '20%':     { transform: 'translate(-2%,3%)' },
+              '40%':     { transform: 'translate(3%,-1%)' },
+              '60%':     { transform: 'translate(-1%,2%)' },
+              '80%':     { transform: 'translate(2%,-2%)' },
+            },
+            shimmer:   { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+          },
+          animation: {
+            float:     'float 4s ease-in-out infinite',
+            pulselive:  'pulselive 1.4s ease-in-out infinite',
+            fadeup:    'fadeup 0.7s ease forwards',
+            grain:     'grain 8s steps(10) infinite',
+            shimmer:   'shimmer 2s linear infinite',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; }
+
+    /* Grain overlay */
+    .grain-overlay::after {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none; z-index: 1;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      animation: grain 8s steps(10) infinite;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #1A1F14; }
+    ::-webkit-scrollbar-thumb { background: #4A7A32; border-radius: 3px; }
+
+    /* Glassmorphism */
+    .glass {
+      background: rgba(26, 31, 20, 0.72);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(107, 158, 74, 0.18);
+    }
+
+    /* Hide scrollbar for scroll rows */
+    .no-scrollbar { scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+
+    /* Card hover lift */
+    .card-lift { transition: transform 0.25s ease, box-shadow 0.25s ease; cursor: pointer; }
+    .card-lift:hover { transform: translateY(-5px); box-shadow: 0 20px 48px rgba(0,0,0,0.45); }
+
+    /* Active nav link */
+    .nav-link { transition: color 0.2s, background 0.2s; }
+    .nav-link.active { color: #6B9E4A; background: rgba(107,158,74,0.15); }
+
+    /* Gradient text */
+    .text-gradient {
+      background: linear-gradient(90deg, #D4622A, #F2B34A);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .text-gradient-green {
+      background: linear-gradient(90deg, #4A7A32, #A8C882);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Section divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(107,158,74,0.25), transparent);
+      margin: 0 24px;
+    }
+
+    /* Filter btn */
+    .filter-btn { transition: all 0.2s; }
+    .filter-btn.active-vlog { background: rgba(107,158,74,0.25); color: #A8C882; }
+    .filter-btn.active-live { background: #D4622A; color: white; }
+    .filter-btn.active-all  { background: rgba(255,255,255,0.1); color: #F5EDD8; }
+
+    /* Star filled */
+    .star-filled { color: #F2B34A; fill: #F2B34A; }
+    .star-empty  { color: #8A8278; }
+
+    /* Added to cart animation */
+    .btn-added { background: #4A7A32 !important; }
+
+    /* Ping animation for live dot */
+    @keyframes ping { 75%,100% { transform: scale(2); opacity: 0; } }
+    .animate-ping { animation: ping 1s cubic-bezier(0,0,0.2,1) infinite; }
+
+    /* Mobile nav drawer */
+    #mobile-drawer { transition: transform 0.3s ease, opacity 0.3s ease; }
+    #mobile-drawer.hidden-drawer { transform: translateY(-10px); opacity: 0; pointer-events: none; }
+  </style>
+</head>
+
+<body class="bg-dusk text-cream overflow-x-hidden">
+
+<!-- ═══════════════════════════════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════════════════════════════ -->
+<nav id="navbar" class="glass fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-4 md:px-6"
+     style="border-bottom:1px solid rgba(107,158,74,0.2)">
+
+  <!-- Logo -->
+  <a href="#hero" class="font-display text-xl font-black tracking-tight select-none flex items-center gap-1">
+    <span class="text-fern">Camp</span><span class="text-gold">vybe</span>
+    <span class="text-lg ml-1">⛺</span>
+  </a>
+
+  <!-- Search — desktop -->
+  <div class="hidden md:flex items-center gap-2 bg-white/5 border border-fern/20 rounded-xl px-4 py-2 w-72">
+    <i data-lucide="search" class="w-4 h-4 text-stone flex-shrink-0"></i>
+    <input id="search-input" type="text" placeholder="Buscar rutas, campings, gear…"
+           class="bg-transparent border-none outline-none text-cream text-sm placeholder-stone w-full" />
+  </div>
+
+  <!-- Links — desktop -->
+  <div class="hidden md:flex items-center gap-1">
+    <a href="#map"   class="nav-link flex items-center gap-2 px-3 py-2 rounded-lg text-pebble text-sm font-medium hover:text-fern hover:bg-fern/10">
+      <i data-lucide="map" class="w-4 h-4"></i>Mapa
+    </a>
+    <a href="#vlogs" class="nav-link flex items-center gap-2 px-3 py-2 rounded-lg text-pebble text-sm font-medium hover:text-fern hover:bg-fern/10">
+      <i data-lucide="video" class="w-4 h-4"></i>Comunidad
+    </a>
+    <a href="#shop"  class="nav-link flex items-center gap-2 px-3 py-2 rounded-lg text-pebble text-sm font-medium hover:text-fern hover:bg-fern/10">
+      <i data-lucide="shopping-bag" class="w-4 h-4"></i>Tienda
+    </a>
+    <a href="#" class="nav-link flex items-center gap-2 px-3 py-2 rounded-lg text-pebble text-sm font-medium hover:text-fern hover:bg-fern/10">
+      <i data-lucide="user" class="w-4 h-4"></i>Perfil
+    </a>
+    <button id="cart-btn" class="relative flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold ml-2"
+            style="background:linear-gradient(135deg,#D4622A,#E8863A)">
+      <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+      Carrito
+      <span id="cart-badge" class="hidden absolute -top-1.5 -right-1.5 bg-gold text-dusk text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+    </button>
+  </div>
+
+  <!-- Hamburger — mobile -->
+  <button id="hamburger" class="md:hidden text-cream p-1">
+    <i data-lucide="menu" class="w-6 h-6" id="icon-menu"></i>
+    <i data-lucide="x"    class="w-6 h-6 hidden" id="icon-close"></i>
+  </button>
+</nav>
+
+<!-- Mobile Drawer -->
+<div id="mobile-drawer" class="glass md:hidden fixed top-16 left-0 right-0 z-40 p-5 flex flex-col gap-2 hidden-drawer"
+     style="border-bottom:1px solid rgba(107,158,74,0.2)">
+  <div class="flex items-center gap-2 bg-white/5 rounded-xl px-4 py-2.5 mb-2">
+    <i data-lucide="search" class="w-4 h-4 text-stone"></i>
+    <input type="text" placeholder="Buscar rutas…" class="bg-transparent outline-none text-cream text-sm placeholder-stone flex-1" />
+  </div>
+  <a href="#map"   onclick="closeDrawer()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-cream text-sm font-medium hover:bg-fern/10 hover:text-fern"><i data-lucide="map" class="w-4 h-4"></i>Mapa</a>
+  <a href="#vlogs" onclick="closeDrawer()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-cream text-sm font-medium hover:bg-fern/10 hover:text-fern"><i data-lucide="video" class="w-4 h-4"></i>Comunidad</a>
+  <a href="#shop"  onclick="closeDrawer()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-cream text-sm font-medium hover:bg-fern/10 hover:text-fern"><i data-lucide="shopping-bag" class="w-4 h-4"></i>Tienda</a>
+  <a href="#"      onclick="closeDrawer()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-cream text-sm font-medium hover:bg-fern/10 hover:text-fern"><i data-lucide="user" class="w-4 h-4"></i>Perfil</a>
+  <button class="flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold mt-1" style="background:linear-gradient(135deg,#D4622A,#E8863A)">
+    <i data-lucide="shopping-cart" class="w-4 h-4"></i>Ver carrito
+  </button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════════════════════════ -->
+<section id="hero" class="grain-overlay relative min-h-screen flex items-center overflow-hidden pt-16"
+         style="background:linear-gradient(135deg,#1A1F14 0%,#1e2d14 45%,#0d1a0a 100%)">
+
+  <!-- Decorative blobs -->
+  <div class="absolute pointer-events-none" style="width:600px;height:600px;left:50%;top:55%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(74,122,50,0.10) 0%,transparent 70%);border-radius:50%"></div>
+  <div class="absolute pointer-events-none" style="width:350px;height:350px;right:5%;top:20%;background:radial-gradient(circle,rgba(212,98,42,0.09) 0%,transparent 70%);border-radius:50%"></div>
+  <div class="absolute pointer-events-none" style="width:220px;height:220px;left:5%;bottom:15%;background:radial-gradient(circle,rgba(107,158,74,0.08) 0%,transparent 70%);border-radius:50%"></div>
+
+  <!-- Weather badge — floating -->
+  <div class="glass animate-float absolute top-24 right-4 md:right-10 rounded-2xl p-4 z-10 min-w-36 hidden sm:block">
+    <p class="text-stone text-xs uppercase tracking-widest mb-2">Condiciones hoy</p>
+    <div class="flex items-center gap-2 text-xs mb-1.5"><i data-lucide="wind" class="w-3.5 h-3.5 text-sage"></i> 12 km/h NW</div>
+    <div class="flex items-center gap-2 text-xs mb-1.5"><i data-lucide="droplets" class="w-3.5 h-3.5 text-fern"></i> 34% humedad</div>
+    <div class="flex items-center gap-2 text-xs"><i data-lucide="thermometer" class="w-3.5 h-3.5 text-ember"></i> 18°C</div>
+  </div>
+
+  <!-- Route card — floating -->
+  <div class="glass animate-float absolute bottom-28 right-4 md:right-14 rounded-2xl p-3.5 z-10 flex items-center gap-3 hidden sm:flex" style="animation-delay:1.5s;max-width:210px">
+    <span class="text-3xl">🏔️</span>
+    <div>
+      <p class="text-sm font-semibold">Sierra Nevada</p>
+      <div id="hero-stars" class="flex items-center gap-1 mt-0.5">
+        <!-- stars rendered by JS -->
+        <span class="text-xs text-stone ml-1">4.9</span>
+      </div>
+      <p class="text-xs text-fern mt-1 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-fern rounded-full inline-block animate-pulse"></span> 3 rutas disponibles</p>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="relative z-10 px-6 md:px-12 max-w-3xl mx-auto w-full py-20 animate-fadeup">
+
+    <!-- Badge -->
+    <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-6 border"
+         style="background:rgba(107,158,74,0.12);color:#6B9E4A;border-color:rgba(107,158,74,0.3)">
+      <i data-lucide="trending-up" class="w-3 h-3"></i>
+      +2.400 aventureros este mes
+    </div>
+
+    <!-- Headline -->
+    <h1 class="font-display font-black leading-none tracking-tight mb-6"
+        style="font-size:clamp(38px,7.5vw,88px)">
+      Tu próxima<br>
+      <span class="text-fern">aventura</span> empieza<br>
+      <span class="text-gradient">aquí.</span>
+    </h1>
+
+    <p class="text-pebble leading-relaxed mb-10 max-w-xl" style="font-size:clamp(15px,2vw,18px)">
+      Descubre campings épicos, conecta con la comunidad y equípate con el mejor gear. Todo en un solo lugar.
+    </p>
+
+    <!-- CTAs -->
+    <div class="flex flex-wrap gap-3 mb-14">
+      <a href="#map" class="flex items-center gap-2.5 px-6 py-4 rounded-2xl text-white font-semibold text-sm md:text-base transition-transform hover:scale-105"
+         style="background:linear-gradient(135deg,#4A7A32,#6B9E4A);box-shadow:0 8px 32px rgba(74,122,50,0.4)">
+        <i data-lucide="compass" class="w-5 h-5"></i>
+        Explorar rutas próximas
+      </a>
+      <a href="#shop" class="flex items-center gap-2.5 px-6 py-4 rounded-2xl font-semibold text-sm md:text-base transition-all hover:bg-white/10"
+         style="background:transparent;border:1.5px solid rgba(255,255,255,0.2);color:#F5EDD8">
+        <i data-lucide="package" class="w-5 h-5"></i>
+        Equiparse para la aventura
+      </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="flex flex-wrap gap-10">
+      <div><p class="font-display font-black text-gold text-3xl">12K+</p><p class="text-stone text-sm">Campings</p></div>
+      <div><p class="font-display font-black text-gold text-3xl">48K+</p><p class="text-stone text-sm">Aventureros</p></div>
+      <div><p class="font-display font-black text-gold text-3xl">3.2K+</p><p class="text-stone text-sm">Rutas</p></div>
+    </div>
+  </div>
+
+  <!-- Bottom fade -->
+  <div class="absolute bottom-0 left-0 right-0 h-28 pointer-events-none" style="background:linear-gradient(transparent,#1A1F14)"></div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MAP SECTION
+═══════════════════════════════════════════════════════════════ -->
+<section id="map" class="py-20 px-4 md:px-8 max-w-6xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex flex-wrap justify-between items-end gap-4 mb-10">
+    <div>
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border mb-3"
+           style="background:rgba(212,98,42,0.12);color:#E8863A;border-color:rgba(212,98,42,0.3)">
+        <i data-lucide="map-pin" class="w-3 h-3"></i> Mapa interactivo
+      </div>
+      <h2 class="font-display font-black" style="font-size:clamp(26px,4vw,48px)">
+        Campings <span class="text-fern">mejor puntuados</span>
+      </h2>
+    </div>
+    <button class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-fern text-sm border transition-colors hover:bg-fern/10"
+            style="border-color:rgba(107,158,74,0.3);background:rgba(107,158,74,0.08)">
+      Ver todos <i data-lucide="chevron-right" class="w-4 h-4"></i>
+    </button>
+  </div>
+
+  <!-- Faux Map -->
+  <div class="relative rounded-2xl overflow-hidden border mb-5"
+       style="height:clamp(280px,42vw,430px);background:linear-gradient(135deg,#1a2810,#0e1a08 50%,#162010);border-color:rgba(107,158,74,0.2)">
+
+    <!-- SVG grid + topo -->
+    <svg class="absolute inset-0 w-full h-full opacity-10" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+          <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#6B9E4A" stroke-width="0.5"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid)"/>
+      <circle cx="35%" cy="42%" r="80" fill="none" stroke="#4A7A32" stroke-width="1" opacity="0.5"/>
+      <circle cx="35%" cy="42%" r="130" fill="none" stroke="#4A7A32" stroke-width="0.6" opacity="0.3"/>
+      <circle cx="60%" cy="32%" r="60" fill="none" stroke="#4A7A32" stroke-width="1" opacity="0.5"/>
+      <circle cx="70%" cy="62%" r="50" fill="none" stroke="#4A7A32" stroke-width="0.8" opacity="0.4"/>
+    </svg>
+
+    <!-- Terrain blobs -->
+    <div class="absolute rounded-full opacity-20" style="width:140px;height:90px;left:29%;top:37%;transform:translate(-50%,-50%);background:#2D4A22;border-radius:60%"></div>
+    <div class="absolute rounded-full opacity-15" style="width:100px;height:65px;left:59%;top:28%;transform:translate(-50%,-50%);background:#4A7A32;border-radius:60%"></div>
+    <div class="absolute rounded-full opacity-18" style="width:110px;height:70px;left:70%;top:60%;transform:translate(-50%,-50%);background:#3D3228;border-radius:60%"></div>
+    <div class="absolute rounded-full opacity-12" style="width:75px;height:50px;left:22%;top:68%;transform:translate(-50%,-50%);background:#6B9E4A;border-radius:60%"></div>
+
+    <!-- Map pins (JS rendered) -->
+    <div id="map-pins"></div>
+
+    <!-- Active popup -->
+    <div id="map-popup" class="glass absolute bottom-4 left-4 p-4 rounded-2xl min-w-48 z-10">
+      <p id="popup-name"     class="text-sm font-semibold"></p>
+      <div id="popup-stars"  class="flex items-center gap-1.5 mt-1"></div>
+      <p id="popup-location" class="text-xs text-stone mt-1 flex items-center gap-1"></p>
+      <button class="mt-2.5 px-3 py-1.5 rounded-lg bg-moss text-white text-xs font-semibold hover:bg-fern transition-colors">
+        Ver camping →
+      </button>
+    </div>
+
+    <!-- Attribution -->
+    <p class="absolute bottom-2 right-3 text-white/25 text-xs">🗺️ Simulación mapa interactivo</p>
+  </div>
+
+  <!-- Camping cards row -->
+  <div id="camping-cards" class="flex gap-4 overflow-x-auto no-scrollbar pb-2"></div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VLOGS & LIVE
+═══════════════════════════════════════════════════════════════ -->
+<section id="vlogs" class="py-20 px-4 md:px-8 max-w-6xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex flex-wrap justify-between items-end gap-4 mb-10">
+    <div>
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border mb-3"
+           style="background:rgba(212,98,42,0.12);color:#E8863A;border-color:rgba(212,98,42,0.3)">
+        <i data-lucide="video" class="w-3 h-3"></i> Comunidad
+      </div>
+      <h2 class="font-display font-black" style="font-size:clamp(26px,4vw,48px)">
+        Vlogs &amp; <span style="color:#E8863A">Streams</span>
+      </h2>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="filterVideos('all')"  id="filter-all"  class="filter-btn active-all  px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider border border-white/10">Todo</button>
+      <button onclick="filterVideos('vlog')" id="filter-vlog" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider border border-white/10 text-stone hover:text-cream">Vlogs</button>
+      <button onclick="filterVideos('live')" id="filter-live" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider border border-white/10 text-stone hover:text-cream">En Vivo</button>
+    </div>
+  </div>
+
+  <!-- Video grid -->
+  <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SHOP
+═══════════════════════════════════════════════════════════════ -->
+<section id="shop" class="py-20 px-4 md:px-8 max-w-6xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex flex-wrap justify-between items-end gap-4 mb-10">
+    <div>
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border mb-3"
+           style="background:rgba(242,179,74,0.12);color:#F2B34A;border-color:rgba(242,179,74,0.3)">
+        <i data-lucide="award" class="w-3 h-3"></i> Artículos destacados
+      </div>
+      <h2 class="font-display font-black" style="font-size:clamp(26px,4vw,48px)">
+        Tienda de <span class="text-gold">Gear</span>
+      </h2>
+    </div>
+    <button class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-gold text-sm border transition-colors hover:bg-gold/10"
+            style="border-color:rgba(242,179,74,0.3);background:rgba(242,179,74,0.08)">
+      Ver catálogo <i data-lucide="chevron-right" class="w-4 h-4"></i>
+    </button>
+  </div>
+
+  <!-- Product grid -->
+  <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4"></div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════════════════════ -->
+<footer class="border-t py-12 px-4 md:px-8" style="border-color:rgba(107,158,74,0.15);background:rgba(0,0,0,0.3)">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-10">
+      <div class="col-span-2 md:col-span-1">
+        <p class="font-display font-black text-xl mb-3">
+          <span class="text-fern">Camp</span><span class="text-gold">vybe</span> ⛺
+        </p>
+        <p class="text-stone text-sm leading-relaxed max-w-52">El ecosistema digital para campistas. Explora, conecta y equípate.</p>
+      </div>
+      <div>
+        <p class="text-xs text-pebble font-semibold uppercase tracking-widest mb-4">Explorar</p>
+        <div class="space-y-2 text-stone text-sm">
+          <p class="hover:text-fern cursor-pointer transition-colors">Rutas cercanas</p>
+          <p class="hover:text-fern cursor-pointer transition-colors">Campings top</p>
+          <p class="hover:text-fern cursor-pointer transition-colors">Mapa interactivo</p>
+          <p class="hover:text-fern cursor-pointer transition-colors">Comunidad</p>
+        </div>
+      </div>
+      <div>
+        <p class="text-xs text-pebble font-semibold uppercase tracking-widest mb-4">Tienda</p>
+        <div class="space-y-2 text-stone text-sm">
+          <p class="hover:text-fern cursor-pointer transition-colors">Mochilas</p>
+          <p class="hover:text-fern cursor-pointer transition-colors">Tiendas de campaña</p>
+          <p class="hover:text-fern cursor-pointer transition-colors">Iluminación</p>
+          <p class="hover:text-fern cursor-pointer transition-colors">Cocina outdoor</p>
+        </div>
+      </div>
+      <div>
+        <p class="text-xs text-pebble font-semibold uppercase tracking-widest mb-4">Empresa</p>
+        <div class="space-y-2 text-stone text-sm">
+          <p class="hover:text-fern cursor-pointer transition-colors">Sobre nosotros</p>
+          <p class="hover:text-fern cursor-pointer transition-colors">Blog</p>
+          <p class="hover:text-fern cursor-pointer transition-colors">Prensa</p>
+          <p class="hover:text-fern cursor-pointer transition-colors">Contacto</p>
+        </div>
+      </div>
+    </div>
+    <div class="divider mb-6"></div>
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <p class="text-stone text-xs">© 2025 Campvybe. Hecho con ❤️ para los que aman la montaña.</p>
+      <div class="flex gap-5">
+        <span class="text-stone text-xs hover:text-cream cursor-pointer transition-colors">Privacidad</span>
+        <span class="text-stone text-xs hover:text-cream cursor-pointer transition-colors">Términos</span>
+        <span class="text-stone text-xs hover:text-cream cursor-pointer transition-colors">Cookies</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════════ -->
+<script>
+// ── Data ────────────────────────────────────────────────────────────────
+const campings = [
+  { id:1, name:"Sierra del Oso",  location:"Asturias, ES",  rating:4.9, reviews:312, emoji:"🏔️", badge:"Top rated", pinLeft:"28%", pinTop:"38%" },
+  { id:2, name:"Vall de Boí",     location:"Lleida, ES",    rating:4.8, reviews:241, emoji:"🌲", badge:"Trending",  pinLeft:"58%", pinTop:"26%" },
+  { id:3, name:"Picos del Sur",   location:"Granada, ES",   rating:4.7, reviews:189, emoji:"🌅", badge:"Nuevo",     pinLeft:"42%", pinTop:"60%" },
+  { id:4, name:"Costa Brava",     location:"Girona, ES",    rating:4.7, reviews:405, emoji:"🌊", badge:null,        pinLeft:"72%", pinTop:"52%" },
+];
+
+const videos = [
+  { id:1, type:"vlog", title:"48h solo en los Picos de Europa",      author:"MontañaLibre",  views:"42K",  duration:"18:24", color:"#4A7A32" },
+  { id:2, type:"live", title:"Amanecer en el Teide — EN VIVO",        author:"CampVibe_ES",   viewers:"1.2K",                 color:"#D4622A" },
+  { id:3, type:"vlog", title:"Equipo ultraligero para trekking",       author:"GearFreak",     views:"28K",  duration:"12:07", color:"#6B9E4A" },
+  { id:4, type:"live", title:"Senderismo nocturno — Pirineos",         author:"NightTrail",    viewers:"890",                  color:"#E8863A" },
+  { id:5, type:"vlog", title:"Los 10 mejores refugios de España",      author:"RutaAlpina",    views:"67K",  duration:"22:41", color:"#2D4A22" },
+  { id:6, type:"vlog", title:"Cocina de campamento gourmet",           author:"WildChef",      views:"15K",  duration:"9:53",  color:"#8A8278" },
+];
+
+const products = [
+  { id:1, name:"Mochila Trail X70",     price:189, old:240,  cat:"Mochilas",  stars:4.8, sold:234, emoji:"🎒" },
+  { id:2, name:"Tienda Ultralight 2P",  price:349, old:null, cat:"Refugio",   stars:4.9, sold:89,  emoji:"⛺" },
+  { id:3, name:"Saco -10°C Merino",     price:219, old:280,  cat:"Descanso",  stars:4.7, sold:156, emoji:"🛏️" },
+  { id:4, name:"Hornillo Piezoeléct.",  price:59,  old:null, cat:"Cocina",    stars:4.6, sold:312, emoji:"🔥" },
+  { id:5, name:"Botas Summit Gore-Tex", price:275, old:320,  cat:"Calzado",   stars:4.9, sold:67,  emoji:"👟" },
+  { id:6, name:"Linterna Headlamp 400", price:45,  old:60,   cat:"Ilum.",     stars:4.5, sold:489, emoji:"🔦" },
+];
+
+let cartCount = 0;
+let activePin = 0;
+let currentFilter = 'all';
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+function stars(rating, size = 12) {
+  let html = '<span class="flex items-center gap-0.5">';
+  for (let i = 1; i <= 5; i++) {
+    html += `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${i <= Math.round(rating) ? '#F2B34A' : 'none'}" stroke="${i <= Math.round(rating) ? '#F2B34A' : '#8A8278'}" stroke-width="2">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>`;
+  }
+  html += '</span>';
+  return html;
+}
+
+function badgeColor(badge) {
+  if (badge === 'Top rated') return 'rgba(242,179,74,0.15);color:#F2B34A';
+  if (badge === 'Trending')  return 'rgba(212,98,42,0.15);color:#E8863A';
+  return 'rgba(107,158,74,0.15);color:#6B9E4A';
+}
+
+// ── Map ──────────────────────────────────────────────────────────────────
+function renderPins() {
+  const container = document.getElementById('map-pins');
+  container.innerHTML = '';
+  campings.forEach((c, i) => {
+    const btn = document.createElement('button');
+    const isActive = i === activePin;
+    btn.style.cssText = `
+      position:absolute;
+      left:${c.pinLeft};top:${c.pinTop};
+      transform:translate(-50%,-50%);
+      width:${isActive ? 44 : 34}px;
+      height:${isActive ? 44 : 34}px;
+      border-radius:50%;
+      background:${isActive ? '#D4622A' : '#2D4A22'};
+      border:${isActive ? '2.5px solid #F2B34A' : '2px solid rgba(107,158,74,0.5)'};
+      font-size:${isActive ? '20px' : '15px'};
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;z-index:${isActive ? 5 : 2};
+      transition:all 0.2s;
+      box-shadow:${isActive ? '0 0 22px rgba(212,98,42,0.55)' : '0 4px 14px rgba(0,0,0,0.4)'};
+    `;
+    btn.textContent = c.emoji;
+    btn.onclick = () => { activePin = i; renderPins(); renderPopup(); renderCampingCards(); };
+    container.appendChild(btn);
+  });
+}
+
+function renderPopup() {
+  const c = campings[activePin];
+  document.getElementById('popup-name').textContent = c.name;
+  document.getElementById('popup-stars').innerHTML = stars(c.rating) + `<span class="text-gold text-xs font-semibold">${c.rating}</span><span class="text-stone text-xs">(${c.reviews})</span>`;
+  document.getElementById('popup-location').innerHTML = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8A8278" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${c.location}`;
+}
+
+function renderCampingCards() {
+  const container = document.getElementById('camping-cards');
+  container.innerHTML = '';
+  campings.forEach((c, i) => {
+    const isActive = i === activePin;
+    const card = document.createElement('div');
+    card.className = 'card-lift flex-shrink-0 rounded-2xl p-4';
+    card.style.cssText = `
+      min-width:210px;
+      background:${isActive ? 'rgba(74,122,50,0.18)' : 'rgba(255,255,255,0.04)'};
+      border:${isActive ? '1.5px solid rgba(107,158,74,0.5)' : '1px solid rgba(255,255,255,0.08)'};
+    `;
+    card.innerHTML = `
+      <div class="text-3xl mb-2">${c.emoji}</div>
+      <p class="text-sm font-semibold">${c.name}</p>
+      <div class="flex items-center gap-1.5 my-1.5">
+        ${stars(c.rating, 11)}
+        <span class="text-gold text-xs font-semibold">${c.rating}</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-stone text-xs">${c.location}</span>
+        ${c.badge ? `<span class="text-xs font-semibold px-2 py-0.5 rounded-full" style="background:${badgeColor(c.badge)}">${c.badge}</span>` : ''}
+      </div>
+    `;
+    card.onclick = () => { activePin = i; renderPins(); renderPopup(); renderCampingCards(); };
+    container.appendChild(card);
+  });
+}
+
+// ── Videos ───────────────────────────────────────────────────────────────
+function renderVideos(filter) {
+  const grid = document.getElementById('video-grid');
+  const list = filter === 'all' ? videos : videos.filter(v => v.type === filter);
+  grid.innerHTML = '';
+
+  list.forEach(v => {
+    const card = document.createElement('div');
+    card.className = 'card-lift rounded-2xl overflow-hidden';
+    card.style.cssText = 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);';
+
+    const liveBadge = v.type === 'live' ? `
+      <div class="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-white text-xs font-bold" style="background:#D4622A">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+        </span>
+        LIVE
+      </div>` : '';
+
+    const durationBadge = v.type === 'vlog' ? `
+      <div class="absolute bottom-2 right-2 px-2 py-0.5 rounded-md text-xs font-semibold" style="background:rgba(0,0,0,0.7)">${v.duration}</div>` : '';
+
+    const viewersBadge = v.type === 'live' ? `
+      <div class="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-md text-xs" style="background:rgba(0,0,0,0.7)">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6B9E4A" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        ${v.viewers} viendo
+      </div>` : '';
+
+    const playIcon = v.type === 'live'
+      ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4M17 9l-5 5-5-5M12 12.8V2.5"/></svg>`
+      : `<svg width="22" height="22" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+
+    const typeBadge = v.type === 'live'
+      ? `<span class="flex items-center gap-1 text-ember text-xs font-semibold px-2 py-0.5 rounded-full" style="background:rgba(212,98,42,0.15)">
+           <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#E8863A" stroke-width="2"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4"/><path d="M17 9l-5 5-5-5M12 12.8V2.5"/></svg>
+           En vivo
+         </span>`
+      : `<span class="text-stone text-xs">${v.views} vistas</span>`;
+
+    card.innerHTML = `
+      <div class="relative h-40 flex items-center justify-center" style="background:linear-gradient(135deg,${v.color}cc,${v.color}44)">
+        <div class="w-13 h-13 rounded-full flex items-center justify-center" style="width:52px;height:52px;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px)">
+          ${playIcon}
+        </div>
+        ${liveBadge}${durationBadge}${viewersBadge}
+      </div>
+      <div class="p-4">
+        <p class="text-sm font-semibold leading-snug mb-2.5">${v.title}</p>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background:${v.color}">${v.author[0]}</div>
+            <span class="text-stone text-xs">${v.author}</span>
+          </div>
+          ${typeBadge}
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function filterVideos(type) {
+  currentFilter = type;
+  // Update buttons
+  ['all','vlog','live'].forEach(t => {
+    const btn = document.getElementById(`filter-${t}`);
+    btn.classList.remove('active-all','active-vlog','active-live','text-stone');
+    btn.style.background = '';
+    btn.style.color = '';
+  });
+  const active = document.getElementById(`filter-${type}`);
+  if (type === 'all')  { active.classList.add('active-all'); }
+  if (type === 'vlog') { active.classList.add('active-vlog'); }
+  if (type === 'live') { active.classList.add('active-live'); }
+  renderVideos(type);
+}
+
+// ── Shop ─────────────────────────────────────────────────────────────────
+function renderProducts() {
+  const grid = document.getElementById('product-grid');
+  grid.innerHTML = '';
+  products.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'card-lift rounded-2xl overflow-hidden flex flex-col';
+    card.style.cssText = 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);';
+
+    const starsHtml = stars(p.stars, 10);
+    const discountBadge = p.old ? `<span class="absolute top-2 left-2 px-2 py-0.5 rounded-lg text-white text-xs font-bold" style="background:#D4622A">OFERTA</span>` : '';
+    const oldPriceHtml = p.old ? `<span class="text-stone text-xs line-through">${p.old}€</span>` : '';
+
+    card.innerHTML = `
+      <div class="relative h-36 flex items-center justify-center text-5xl" style="background:rgba(255,255,255,0.03)">
+        ${p.emoji}
+        ${discountBadge}
+        <button class="absolute top-2 right-2 p-1.5 rounded-lg text-stone hover:text-sunset transition-colors" style="background:rgba(255,255,255,0.08)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+      </div>
+      <div class="p-3.5 flex flex-col gap-1.5 flex-1">
+        <span class="text-stone text-xs uppercase tracking-wider">${p.cat}</span>
+        <p class="text-xs font-semibold leading-tight">${p.name}</p>
+        <div class="flex items-center gap-1">
+          ${starsHtml}
+          <span class="text-stone text-xs">(${p.sold})</span>
+        </div>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span class="text-gold font-bold text-base">${p.price}€</span>
+          ${oldPriceHtml}
+        </div>
+        <button id="add-btn-${p.id}"
+          onclick="addToCart(${p.id}, this)"
+          class="mt-auto py-2 px-3 rounded-xl text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+          style="background:linear-gradient(135deg,#D4622A,#E8863A)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          Añadir
+        </button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function addToCart(id, btn) {
+  cartCount++;
+  // Update badge
+  const badge = document.getElementById('cart-badge');
+  badge.textContent = cartCount;
+  badge.classList.remove('hidden');
+  badge.style.display = 'flex';
+  // Feedback on button
+  btn.style.background = '#4A7A32';
+  btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> ¡Añadido!`;
+  setTimeout(() => {
+    btn.style.background = 'linear-gradient(135deg,#D4622A,#E8863A)';
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Añadir`;
+  }, 1800);
+}
+
+// ── Navbar ───────────────────────────────────────────────────────────────
+const hamburger = document.getElementById('hamburger');
+const drawer    = document.getElementById('mobile-drawer');
+const iconMenu  = document.getElementById('icon-menu');
+const iconClose = document.getElementById('icon-close');
+let drawerOpen  = false;
+
+hamburger.addEventListener('click', () => {
+  drawerOpen = !drawerOpen;
+  if (drawerOpen) {
+    drawer.classList.remove('hidden-drawer');
+    iconMenu.classList.add('hidden');
+    iconClose.classList.remove('hidden');
+  } else {
+    closeDrawer();
+  }
+});
+
+function closeDrawer() {
+  drawerOpen = false;
+  drawer.classList.add('hidden-drawer');
+  iconMenu.classList.remove('hidden');
+  iconClose.classList.add('hidden');
+}
+
+// Active nav on scroll
+const sections = ['hero','map','vlogs','shop'];
+window.addEventListener('scroll', () => {
+  const scrollY = window.scrollY + 100;
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const { offsetTop, offsetHeight } = el;
+    const links = document.querySelectorAll(`.nav-link[href="#${id}"]`);
+    links.forEach(l => {
+      if (scrollY >= offsetTop && scrollY < offsetTop + offsetHeight) {
+        l.classList.add('active');
+      } else {
+        l.classList.remove('active');
+      }
+    });
+  });
+}, { passive: true });
+
+// Navbar shrink on scroll
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  if (window.scrollY > 60) {
+    nav.style.height = '56px';
+  } else {
+    nav.style.height = '64px';
+  }
+}, { passive: true });
+
+// ── Hero stars ───────────────────────────────────────────────────────────
+document.getElementById('hero-stars').insertAdjacentHTML('afterbegin', stars(4.9, 11));
+
+// ── Init ─────────────────────────────────────────────────────────────────
+renderPins();
+renderPopup();
+renderCampingCards();
+renderVideos('all');
+renderProducts();
+
+// Init lucide icons
+lucide.createIcons();
+
+// Re-run lucide after dynamic content (small delay)
+setTimeout(() => lucide.createIcons(), 100);
+</script>
+
+</body>
+</html>
